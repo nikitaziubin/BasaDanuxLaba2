@@ -4,53 +4,50 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Search Divisions</h1>
+<h1>Find managers</h1>
 
-<h4>Choose name stadium</h4>
+<h4>Chose teams number</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Stadium.Name" class="control-label">Ім'я стадіону </label>
-                <select asp-for="Stadium.Name" class="form-control" asp-items="ViewBag.Name"></select>
+                <label asp-for="Manager.Id" class="control-label"></label>
+                <input asp-for="Manager.Id" class="form-control" />
+                <span asp-validation-for="Manager.Id" class="text-danger"></span>
             </div>
-            
             <div class="form-group">
                 <input type="submit" value="Find" class="btn btn-primary" />
             </div>
         </form>
- 
     </div>
 </div>
-
 <table class="table">
     <thead>
         <tr>
             <th>
-                Назва дівізіону@*@Html.DisplayNameFor(model => model.)*@
+                Ім`я@*@Html.DisplayNameFor(model => model.)*@
             </th>
             <th>
-                Левел@*@Html.DisplayNameFor(model => model.)*@
+                Кількість команд@*@Html.DisplayNameFor(model => model.)*@
             </th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.divisions)
+        @foreach (var item in Model.managers)
         {
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Level)
+                    @Html.DisplayFor(modelItem => item.Club)
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
 <div>
     <a asp-action="Index">Back to List</a>
 </div>

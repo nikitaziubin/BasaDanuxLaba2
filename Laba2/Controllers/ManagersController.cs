@@ -6,104 +6,101 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Laba2;
-using Microsoft.Data.SqlClient;
-using Microsoft.CodeAnalysis.Elfie.Model.Structures;
 using Laba2.ViewModels;
 
 namespace Laba2.Controllers
 {
-    public class StadiaController : Controller
+    public class ManagersController : Controller
     {
         private readonly BasaDanuxLaba2Context _context;
 
-        public StadiaController(BasaDanuxLaba2Context context)
+        public ManagersController(BasaDanuxLaba2Context context)
         {
             _context = context;
         }
 
-        // GET: Stadia
+        // GET: Managers
         public async Task<IActionResult> Index()
         {
-              return _context.Stadiums != null ? 
-                          View(await _context.Stadiums.ToListAsync()) :
-                          Problem("Entity set 'BasaDanuxLaba2Context.Stadiums'  is null.");
+              return _context.Managers != null ? 
+                          View(await _context.Managers.ToListAsync()) :
+                          Problem("Entity set 'BasaDanuxLaba2Context.Managers'  is null.");
         }
 
-        // GET: Stadia/Details/5
+        // GET: Managers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Stadiums == null)
+            if (id == null || _context.Managers == null)
             {
                 return NotFound();
             }
 
-            var stadium = await _context.Stadiums
+            var manager = await _context.Managers
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (stadium == null)
+            if (manager == null)
             {
                 return NotFound();
             }
 
-            return View(stadium);
+            return View(manager);
         }
 
-        // GET: Stadia/Create
+        // GET: Managers/Create
         public IActionResult Create()
         {
-            ViewData["Name"] = new SelectList(_context.Stadiums, "Name", "Name");
-            string stadiumName = "%";
-            var divisions = _context.Divisions
-                    .FromSql($"select Divisions.*from Stadiums\r\n  Join Matches on Stadiums.ID = Matches.StadiumID\r\n  Join Divisions on Divisions.ID = Matches.divisionID\r\n  where Stadiums.name like {stadiumName}").ToList();
-            var viewModel = new DivisioStadiumViwModel
-            {
-                divisions = divisions
-            };
-            return View(viewModel);
-        }
-
-        // POST: Stadia/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Adress,Name,Capacity,MaxCapacity")] Stadium stadium)
-        {
-            string stadiumName = stadium.Name;
-            var divisions = _context.Divisions
-                                .FromSql($"select Divisions.*from Stadiums\r\n  Join Matches on Stadiums.ID = Matches.StadiumID\r\n  Join Divisions on Divisions.ID = Matches.divisionID\r\n  where Stadiums.name like {stadiumName}").ToList();
+            int count = 0;
+            var managersResult = _context.Managers
+                                .FromSql($"\t\tselect Managers.*, COUNT(t.ID) AS Club\r\n\tfrom Managers \r\n  Join Clubs c on Managers.ID = c.managerID\r\n  Join Teams t on c.ID = t.ClubID\t\r\n  GROUP BY Managers.ID , Managers.Name\r\n  HAVING COUNT(DISTINCT t.ID) != {count};").ToList();
             //ViewData["DivisionsResult"] = new SelectList(divisions);
             var viewModel = new DivisioStadiumViwModel
             {
-                divisions = divisions
+                managers = managersResult
             };
-            ViewData["Name"] = new SelectList(_context.Stadiums, "Name", "Name"); 
             return View(viewModel);
         }
 
-        // GET: Stadia/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Stadiums == null)
-            {
-                return NotFound();
-            }
-
-            var stadium = await _context.Stadiums.FindAsync(id);
-            if (stadium == null)
-            {
-                return NotFound();
-            }
-            return View(stadium);
-        }
-
-        // POST: Stadia/Edit/5
+        // POST: Managers/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Adress,Name,Capacity,MaxCapacity")] Stadium stadium)
+        public async Task<IActionResult> Create([Bind("Id,Name")] Manager manager)
         {
-            if (id != stadium.Id)
+            int count = manager.Id;
+            var managersResult = _context.Managers
+                                .FromSql($"\t\tselect Managers.*, COUNT(t.ID) AS Club\r\n\tfrom Managers \r\n  Join Clubs c on Managers.ID = c.managerID\r\n  Join Teams t on c.ID = t.ClubID\t\r\n  GROUP BY Managers.ID , Managers.Name\r\n  HAVING COUNT(DISTINCT t.ID) >= {count};").ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+                managers = managersResult
+            };
+            return View(viewModel);
+        }
+
+        // GET: Managers/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null || _context.Managers == null)
+            {
+                return NotFound();
+            }
+
+            var manager = await _context.Managers.FindAsync(id);
+            if (manager == null)
+            {
+                return NotFound();
+            }
+            return View(manager);
+        }
+
+        // POST: Managers/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Manager manager)
+        {
+            if (id != manager.Id)
             {
                 return NotFound();
             }
@@ -112,12 +109,12 @@ namespace Laba2.Controllers
             {
                 try
                 {
-                    _context.Update(stadium);
+                    _context.Update(manager);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StadiumExists(stadium.Id))
+                    if (!ManagerExists(manager.Id))
                     {
                         return NotFound();
                     }
@@ -128,49 +125,49 @@ namespace Laba2.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(stadium);
+            return View(manager);
         }
 
-        // GET: Stadia/Delete/5
+        // GET: Managers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Stadiums == null)
+            if (id == null || _context.Managers == null)
             {
                 return NotFound();
             }
 
-            var stadium = await _context.Stadiums
+            var manager = await _context.Managers
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (stadium == null)
+            if (manager == null)
             {
                 return NotFound();
             }
 
-            return View(stadium);
+            return View(manager);
         }
 
-        // POST: Stadia/Delete/5
+        // POST: Managers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Stadiums == null)
+            if (_context.Managers == null)
             {
-                return Problem("Entity set 'BasaDanuxLaba2Context.Stadiums'  is null.");
+                return Problem("Entity set 'BasaDanuxLaba2Context.Managers'  is null.");
             }
-            var stadium = await _context.Stadiums.FindAsync(id);
-            if (stadium != null)
+            var manager = await _context.Managers.FindAsync(id);
+            if (manager != null)
             {
-                _context.Stadiums.Remove(stadium);
+                _context.Managers.Remove(manager);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool StadiumExists(int id)
+        private bool ManagerExists(int id)
         {
-          return (_context.Stadiums?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.Managers?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

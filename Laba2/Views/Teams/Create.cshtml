@@ -13,15 +13,15 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Stadium.Name" class="control-label">Ім'я стадіону </label>
-                <select asp-for="Stadium.Name" class="form-control" asp-items="ViewBag.Name"></select>
+                <label asp-for="Team.Name" class="control-label">Ім'я команди</label>
+                <select asp-for="Team.Name" class="form-control" asp-items="ViewBag.Teams"></select>
             </div>
-            
+
             <div class="form-group">
                 <input type="submit" value="Find" class="btn btn-primary" />
             </div>
         </form>
- 
+
     </div>
 </div>
 
@@ -29,22 +29,22 @@
     <thead>
         <tr>
             <th>
-                Назва дівізіону@*@Html.DisplayNameFor(model => model.)*@
+                Дата@*@Html.DisplayNameFor(model => model.)*@
             </th>
             <th>
-                Левел@*@Html.DisplayNameFor(model => model.)*@
+                Стадіон@*@Html.DisplayNameFor(model => model.)*@
             </th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.divisions)
+        @foreach (var item in Model.matches)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
+                    @Html.DisplayFor(modelItem => item.Date)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Level)
+                    @Html.DisplayFor(modelItem => item.Stadium.Name)
                 </td>
             </tr>
         }
@@ -56,5 +56,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

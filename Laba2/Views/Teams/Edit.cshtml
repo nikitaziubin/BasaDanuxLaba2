@@ -4,24 +4,23 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Search Divisions</h1>
+<h1>Search Teams</h1>
 
-<h4>Choose name stadium</h4>
+<h4>Choose name number of divisions</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Stadium.Name" class="control-label">Ім'я стадіону </label>
-                <select asp-for="Stadium.Name" class="form-control" asp-items="ViewBag.Name"></select>
+                <label asp-for="Team.Id" class="control-label">Кількість дівізіонів</label>
+                <input asp-for="Team.Id" class="form-control" type="number" />
             </div>
-            
             <div class="form-group">
                 <input type="submit" value="Find" class="btn btn-primary" />
             </div>
         </form>
- 
+
     </div>
 </div>
 
@@ -29,22 +28,16 @@
     <thead>
         <tr>
             <th>
-                Назва дівізіону@*@Html.DisplayNameFor(model => model.)*@
-            </th>
-            <th>
-                Левел@*@Html.DisplayNameFor(model => model.)*@
+                Назва команди@*@Html.DisplayNameFor(model => model.)*@
             </th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.divisions)
+        @foreach (var item in Model.teams)
         {
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Level)
                 </td>
             </tr>
         }
@@ -56,5 +49,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

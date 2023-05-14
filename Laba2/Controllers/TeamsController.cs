@@ -157,3 +157,47 @@ namespace Laba2.Controllers
         }
     }
 }
+//SELECT DISTINCT t.name
+//FROM Teams t
+//JOIN participate p ON t.id = p.teamid
+//JOIN matches m ON p.matchid = m.id
+//JOIN stadiums s ON m.stadiumid = s.id
+//WHERE t.name != 'Arsenal 2'
+//  AND NOT EXISTS (
+//		(SELECT s2.name
+//		FROM Teams t2
+//		JOIN participate p2 ON t2.id = p2.teamid
+//		JOIN matches m2 ON p2.matchid = m2.id
+//		JOIN stadiums s2 ON m2.stadiumid = s2.id
+//		WHERE t2.name = 'Arsenal 2')
+//    EXCEPT
+//        (SELECT s2.name
+
+//        FROM Teams t2
+
+//        JOIN participate p2 ON t2.id = p2.teamid
+
+//        JOIN matches m2 ON p2.matchid = m2.id
+
+//        JOIN stadiums s2 ON m2.stadiumid = s2.id
+
+//        WHERE t.ID = t2.ID))
+//  AND NOT EXISTS (
+//		(SELECT s2.name
+//		FROM Teams t2
+//		JOIN participate p2 ON t2.id = p2.teamid
+//		JOIN matches m2 ON p2.matchid = m2.id
+//		JOIN stadiums s2 ON m2.stadiumid = s2.id
+//		WHERE t.ID = t2.ID)
+//    EXCEPT
+//        (SELECT s2.name
+
+//        FROM Teams t2
+
+//        JOIN participate p2 ON t2.id = p2.teamid
+
+//        JOIN matches m2 ON p2.matchid = m2.id
+
+//        JOIN stadiums s2 ON m2.stadiumid = s2.id
+
+//        WHERE t2.name = 'Arsenal 2'));

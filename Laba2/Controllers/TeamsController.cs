@@ -119,7 +119,7 @@ namespace Laba2.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             var stadiumResult = _context.Stadiums
-                                     .FromSql($"SELECT DISTINCT s.*\r\nFROM Stadiums s")
+                                     .FromSql($"SELECT s.*\r\nFROM Stadiums s")
                                      .ToList();
             //ViewData["DivisionsResult"] = new SelectList(divisions);
             var viewModel = new DivisioStadiumViwModel
@@ -139,7 +139,7 @@ namespace Laba2.Controllers
             string count = team.Name;
 
             var teamResult = _context.Stadiums
-                                     .FromSql($"SELECT DISTINCT s.*\r\nFROM Stadiums s\r\nINNER JOIN Matches m ON s.ID = m.StadiumID\r\nINNER JOIN Participate p ON m.ID = p.MatchID\r\nINNER JOIN Teams t ON p.TeamID = t.ID\r\nWHERE t.Name = {count} AND p.yellow_cards > 0")
+                                     .FromSql($"SELECT s.*\r\nFROM Stadiums s\r\nINNER JOIN Matches m ON s.ID = m.StadiumID\r\nINNER JOIN Participate p ON m.ID = p.MatchID\r\nINNER JOIN Teams t ON p.TeamID = t.ID\r\nWHERE t.Name = {count} AND p.yellow_cards > 0")
                                      .Include(p=>p.Matches).ToList();
             //ViewData["DivisionsResult"] = new SelectList(divisions);
             var viewModel = new DivisioStadiumViwModel

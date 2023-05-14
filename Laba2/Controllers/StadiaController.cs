@@ -83,17 +83,18 @@ namespace Laba2.Controllers
         // GET: Stadia/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Stadiums == null)
+            ViewData["Name"] = new SelectList(_context.Stadiums, "Name", "Name");
+            string stadiumName = "%";
+            var divisions = _context.Stadiums
+                    .FromSql($"select * from Stadiums").ToList();
+            var data = _context.Matches
+                    .FromSql($"select * from Matches").ToList();
+            var viewModel = new DivisioStadiumViwModel
             {
-                return NotFound();
-            }
-
-            var stadium = await _context.Stadiums.FindAsync(id);
-            if (stadium == null)
-            {
-                return NotFound();
-            }
-            return View(stadium);
+                matches = data,
+                stadiums = divisions
+            };
+            return View(viewModel);
         }
 
         // POST: Stadia/Edit/5
@@ -103,32 +104,18 @@ namespace Laba2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Adress,Name,Capacity,MaxCapacity")] Stadium stadium)
         {
-            if (id != stadium.Id)
+            ViewData["Name"] = new SelectList(_context.Stadiums, "Name", "Name");
+            string stadiumName = stadium.Name;
+            var divisions = _context.Stadiums
+                    .FromSql($"SELECT  s.*, m.Date\r\nFROM stadiums s\r\nJOIN matches m ON s.id = m.stadiumid\r\nWHERE s.name != {stadiumName} and exists (\r\n    SELECT m2.Date\r\n    FROM stadiums s2\r\n    JOIN matches m2 ON s2.id = m2.stadiumid\r\n    WHERE s2.name = {stadiumName} and m.Date = m2.Date  \r\n);\r\n").ToList();
+            var date= _context.Matches
+                    .FromSql($"SELECT  m.*\r\nFROM stadiums s\r\nJOIN matches m ON s.id = m.stadiumid\r\nWHERE s.name != {stadiumName} and exists (\r\n    SELECT m2.Date\r\n    FROM stadiums s2\r\n    JOIN matches m2 ON s2.id = m2.stadiumid\r\n    WHERE s2.name = {stadiumName} and m.Date = m2.Date  \r\n);\r\n").ToList();
+            var viewModel = new DivisioStadiumViwModel
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(stadium);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!StadiumExists(stadium.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(stadium);
+                matches = date,
+                stadiums = divisions
+            };
+            return View(viewModel);
         }
 
         // GET: Stadia/Delete/5

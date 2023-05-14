@@ -50,7 +50,7 @@ namespace Laba2.Controllers
         {
             var matchesResult = _context.Matches
                                 .FromSql($"SELECT m.*\r\nFROM Matches m\r\nINNER JOIN Participate p ON m.ID = p.MatchID\r\nINNER JOIN Teams t ON p.TeamID = t.ID\r\nWHERE p.red_cards != -1 ")
-                                .Include(P=>P.Stadium).ToList();
+                                .Include(P => P.Stadium).ToList();
             //ViewData["DivisionsResult"] = new SelectList(divisions);
             var viewModel = new DivisioStadiumViwModel
             {
@@ -140,7 +140,7 @@ namespace Laba2.Controllers
 
             var teamResult = _context.Stadiums
                                      .FromSql($"SELECT s.*\r\nFROM Stadiums s\r\nINNER JOIN Matches m ON s.ID = m.StadiumID\r\nINNER JOIN Participate p ON m.ID = p.MatchID\r\nINNER JOIN Teams t ON p.TeamID = t.ID\r\nWHERE t.Name = {count} AND p.yellow_cards > 0")
-                                     .Include(p=>p.Matches).ToList();
+                                     .Include(p => p.Matches).ToList();
             //ViewData["DivisionsResult"] = new SelectList(divisions);
             var viewModel = new DivisioStadiumViwModel
             {
@@ -151,53 +151,117 @@ namespace Laba2.Controllers
             return View(viewModel);
         }
 
+        public async Task<IActionResult> Query7(int? id)
+        {
+            ViewData["Name"] = new SelectList(_context.Teams, "Name", "Name");
+
+            var TeamsResult = _context.Teams
+                                     .FromSql($"SELECT s.*\r\nFROM Teams s")
+                                     .ToList();
+            var Result = _context.Matches
+                                     .FromSql($"SELECT s.*\r\nFROM Matches s")
+                                     .ToList();
+            var Result2 = _context.Participates
+                                     .FromSql($"SELECT s.*\r\nFROM Participate s")
+                                     .ToList();
+            var Result3 = _context.Stadiums
+                                     .FromSql($"SELECT s.*\r\nFROM Stadiums s")
+                                     .ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+                stadiums = Result3,
+                participates = Result2,
+                matches = Result,
+                teams = TeamsResult
+            };
+            ViewData["Teams"] = new SelectList(_context.Teams, "Name", "Name");
+            return View(viewModel);
+        }
+
+        // POST: Teams/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Query7(Team team)
+        {
+            string name = team.Name;
+            var teamResult = _context.Teams
+                                     .FromSql($"SELECT DISTINCT t.*\r\nFROM Teams t\r\nJOIN participate p ON t.id = p.teamid\r\nJOIN matches m ON p.matchid = m.id\r\nJOIN stadiums s ON m.stadiumid = s.id\r\nWHERE t.name != {name}\r\n  AND NOT EXISTS (\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t2.name = {name})\r\n    EXCEPT\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t.ID = t2.ID))\r\n  AND NOT EXISTS (\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t.ID = t2.ID)\r\n    EXCEPT\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t2.name = {name}));\r\n")
+                                     .ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+                teams = teamResult
+            };
+            ViewData["Teams"] = new SelectList(_context.Teams, "Name", "Name");
+            return View(viewModel);
+        }
+
+
+        public async Task<IActionResult> Query8(int? id)
+        {
+            ViewData["Name"] = new SelectList(_context.Teams, "Name", "Name");
+
+            var TeamsResult = _context.Teams
+                                     .FromSql($"SELECT s.*\r\nFROM Teams s")
+                                     .ToList();
+            var Result = _context.Matches
+                                     .FromSql($"SELECT s.*\r\nFROM Matches s")
+                                     .ToList();
+            var Result2 = _context.Participates
+                                     .FromSql($"SELECT s.*\r\nFROM Participate s")
+                                     .ToList();
+            var Result3 = _context.Divisions
+                                     .FromSql($"SELECT s.*\r\nFROM Divisions s")
+                                     .ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+                divisions = Result3,
+                participates = Result2,
+                matches = Result,
+                teams = TeamsResult
+            };
+            ViewData["Teams"] = new SelectList(_context.Teams, "Name", "Name");
+            return View(viewModel);
+        }
+
+        // POST: Teams/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Query8(Team team)
+        {
+            string name = team.Name;
+            var teamResult = _context.Teams
+                                     .FromSql($"SELECT t.*\r\nFROM Teams t\r\nJOIN participate p ON t.id = p.teamid\r\nJOIN Matches m ON p.matchid = m.ID\r\nJOIN divisions d ON m.DivisionID = d.ID\r\nWHERE t.name != {name} and d.id in (\r\n SELECT distinct d2.ID\r\n    FROM divisions d2\r\n    JOIN Matches m2 ON d2.ID = m2.DivisionID\r\n    JOIN participate p2 ON m2.ID = p2.matchid\r\n    JOIN Teams t2 ON p2.teamid = t2.id\r\n    WHERE t2.name = {name}\r\n);")
+                                     .ToList();
+            var Result = _context.Matches
+                                     .FromSql($"SELECT s.*\r\nFROM Matches s")
+                                     .ToList();
+            var Result2 = _context.Participates
+                                     .FromSql($"SELECT s.*\r\nFROM Participate s")
+                                     .ToList();
+            var Result3 = _context.Divisions
+                                     .FromSql($"SELECT s.*\r\nFROM Divisions s")
+                                     .ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+                divisions = Result3,
+                participates = Result2,
+                matches = Result,
+                teams = teamResult
+            };
+            ViewData["Teams"] = new SelectList(_context.Teams, "Name", "Name");
+            return View(viewModel);
+        }
+
+
+
         private bool TeamExists(int id)
         {
-          return (_context.Teams?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Teams?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
-//SELECT DISTINCT t.name
-//FROM Teams t
-//JOIN participate p ON t.id = p.teamid
-//JOIN matches m ON p.matchid = m.id
-//JOIN stadiums s ON m.stadiumid = s.id
-//WHERE t.name != 'Arsenal 2'
-//  AND NOT EXISTS (
-//		(SELECT s2.name
-//		FROM Teams t2
-//		JOIN participate p2 ON t2.id = p2.teamid
-//		JOIN matches m2 ON p2.matchid = m2.id
-//		JOIN stadiums s2 ON m2.stadiumid = s2.id
-//		WHERE t2.name = 'Arsenal 2')
-//    EXCEPT
-//        (SELECT s2.name
 
-//        FROM Teams t2
-
-//        JOIN participate p2 ON t2.id = p2.teamid
-
-//        JOIN matches m2 ON p2.matchid = m2.id
-
-//        JOIN stadiums s2 ON m2.stadiumid = s2.id
-
-//        WHERE t.ID = t2.ID))
-//  AND NOT EXISTS (
-//		(SELECT s2.name
-//		FROM Teams t2
-//		JOIN participate p2 ON t2.id = p2.teamid
-//		JOIN matches m2 ON p2.matchid = m2.id
-//		JOIN stadiums s2 ON m2.stadiumid = s2.id
-//		WHERE t.ID = t2.ID)
-//    EXCEPT
-//        (SELECT s2.name
-
-//        FROM Teams t2
-
-//        JOIN participate p2 ON t2.id = p2.teamid
-
-//        JOIN matches m2 ON p2.matchid = m2.id
-
-//        JOIN stadiums s2 ON m2.stadiumid = s2.id
-
-//        WHERE t2.name = 'Arsenal 2'));

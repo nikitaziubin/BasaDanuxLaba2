@@ -188,6 +188,56 @@ namespace Laba2.Controllers
             var teamResult = _context.Teams
                                      .FromSql($"SELECT DISTINCT t.*\r\nFROM Teams t\r\nJOIN participate p ON t.id = p.teamid\r\nJOIN matches m ON p.matchid = m.id\r\nJOIN stadiums s ON m.stadiumid = s.id\r\nWHERE t.name != {name}\r\n  AND NOT EXISTS (\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t2.name = {name})\r\n    EXCEPT\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t.ID = t2.ID))\r\n  AND NOT EXISTS (\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t.ID = t2.ID)\r\n    EXCEPT\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t2.name = {name}));\r\n")
                                      .ToList();
+            var Result3 = _context.Stadiums
+                                     .FromSql($"SELECT s.*\r\nFROM Stadiums s")
+                                     .ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+               // stadiums = Result3,
+                teams = teamResult
+            };
+            ViewData["Teams"] = new SelectList(_context.Teams, "Name", "Name");
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> Query7_1(int? id)
+        {
+            ViewData["Name"] = new SelectList(_context.Teams, "Name", "Name");
+
+            var TeamsResult = _context.Teams
+                                     .FromSql($"SELECT s.*\r\nFROM Teams s")
+                                     .ToList();
+            var Result = _context.Matches
+                                     .FromSql($"SELECT s.*\r\nFROM Matches s")
+                                     .ToList();
+            var Result2 = _context.Participates
+                                     .FromSql($"SELECT s.*\r\nFROM Participate s")
+                                     .ToList();
+            var Result3 = _context.Stadiums
+                                     .FromSql($"SELECT s.*\r\nFROM Stadiums s")
+                                     .ToList();
+            //ViewData["DivisionsResult"] = new SelectList(divisions);
+            var viewModel = new DivisioStadiumViwModel
+            {
+                stadiums = Result3,
+                participates = Result2,
+                matches = Result,
+                teams = TeamsResult
+            };
+            ViewData["Teams"] = new SelectList(_context.Teams, "Name", "Name");
+            return View(viewModel);
+        }
+
+        // POST: Teams/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Query7_1(Team team)
+        {   
+            string name = team.Name;
+            var teamResult = _context.Teams
+                                     .FromSql($"\tSELECT DISTINCT t.*\r\nFROM Teams t\r\nJOIN participate p ON t.id = p.teamid\r\nJOIN matches m ON p.matchid = m.id\r\nJOIN stadiums s ON m.stadiumid = s.id\r\nWHERE t.name != {name}\r\n  AND NOT EXISTS (\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t2.name = {name})\r\n    EXCEPT\r\n    (SELECT s2.name\r\n    FROM Teams t2\r\n    JOIN participate p2 ON t2.id = p2.teamid\r\n    JOIN matches m2 ON p2.matchid = m2.id\r\n    JOIN stadiums s2 ON m2.stadiumid = s2.id\r\n    WHERE t.ID = t2.ID))")
+                                     .ToList();
             //ViewData["DivisionsResult"] = new SelectList(divisions);
             var viewModel = new DivisioStadiumViwModel
             {

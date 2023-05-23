@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Laba2;
 using Laba2.ViewModels;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.InkML;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace Laba2.Controllers
 {
@@ -22,9 +25,9 @@ namespace Laba2.Controllers
         // GET: Managers
         public async Task<IActionResult> Index()
         {
-              return _context.Managers != null ? 
-                          View(await _context.Managers.ToListAsync()) :
-                          Problem("Entity set 'BasaDanuxLaba2Context.Managers'  is null.");
+            return _context.Managers != null ?
+                        View(await _context.Managers.ToListAsync()) :
+                        Problem("Entity set 'BasaDanuxLaba2Context.Managers'  is null.");
         }
 
         // GET: Managers/Details/5
@@ -86,7 +89,7 @@ namespace Laba2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Manager manager)
+        public ActionResult Create([Bind("Id,Name")] Manager manager)
         {
             int count = manager.Id;
             var managersResult = _context.Managers
@@ -96,9 +99,38 @@ namespace Laba2.Controllers
             {
                 managers = managersResult
             };
-            return View(viewModel);
-        }
 
+
+
+            using ( XLWorkbook workbook = new XLWorkbook())
+            {
+
+                var worksheet = workbook.Worksheets.Add("Managers");
+                worksheet.Cell("A1").Value = "Ім'я Менеджера";
+
+                worksheet.Row(1).Style.Font.Bold = true;
+                int j = 1;
+                int i = 2;
+                foreach (var c in managersResult)
+                {
+                    worksheet.Cell(i, j).Value = c.Name;
+                    //j++;
+                    i++;
+                }
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    stream.Flush();
+                    return new FileContentResult(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    {
+                        // Змініть назву файла відповідно до тематики Вашого проєкту
+                        FileDownloadName = $"library{DateTime.UtcNow.ToShortDateString()}.xlsx"
+                    };
+
+                }
+            }
+            //return View(viewModel);
+        }
         // GET: Managers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -182,14 +214,14 @@ namespace Laba2.Controllers
             {
                 _context.Managers.Remove(manager);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ManagerExists(int id)
         {
-          return (_context.Managers?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Managers?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

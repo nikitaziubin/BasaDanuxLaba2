@@ -45,6 +45,28 @@ namespace Laba2.Controllers
             return View(manager);
         }
 
+
+        public IActionResult CreateQ()
+        {
+            return View();
+        }
+
+        // POST: Divisions/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateQ([Bind("Id,DivisoinOrLeague,Level,Name")] Manager manager)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(manager);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(manager);
+        }
+
         // GET: Managers/Create
         public IActionResult Create()
         {

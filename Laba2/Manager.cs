@@ -8,7 +8,6 @@ public partial class Manager
     public int Id { get; set; }
 
     public string Name { get; set; } = null!;
-    public int Club { get; set; }
 
     public virtual ICollection<Club> Clubs { get; set; } = new List<Club>();
 }

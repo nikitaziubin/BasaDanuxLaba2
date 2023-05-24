@@ -9,6 +9,7 @@ using Laba2;
 using Microsoft.Data.SqlClient;
 using Microsoft.CodeAnalysis.Elfie.Model.Structures;
 using Laba2.ViewModels;
+using ClosedXML.Excel;
 
 namespace Laba2.Controllers
 {
@@ -66,7 +67,7 @@ namespace Laba2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Adress,Name,Capacity,MaxCapacity")] Stadium stadium)
+        public ActionResult Create([Bind("Id,Adress,Name,Capacity,MaxCapacity")] Stadium stadium)
         {
             string stadiumName = stadium.Name;
             var divisions = _context.Divisions
@@ -76,8 +77,37 @@ namespace Laba2.Controllers
             {
                 divisions = divisions
             };
-            ViewData["Name"] = new SelectList(_context.Stadiums, "Name", "Name"); 
-            return View(viewModel);
+            ViewData["Name"] = new SelectList(_context.Stadiums, "Name", "Name");
+
+            using (XLWorkbook workbook = new XLWorkbook())
+            {
+
+                var worksheet = workbook.Worksheets.Add("Managers");
+                worksheet.Cell("A1").Value = "Ім'я Дівізіону";
+                worksheet.Cell("B1").Value = "Левел";
+
+                worksheet.Row(1).Style.Font.Bold = true;
+                int j = 1;
+                int i = 2;
+                foreach (var c in divisions)
+                {
+                    worksheet.Cell(i, j).Value = c.Name;
+                    worksheet.Cell(i, j+1).Value = c.Level;
+                    //j++;
+                    i++;
+                }
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    stream.Flush();
+                    return new FileContentResult(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    {
+                        // Змініть назву файла відповідно до тематики Вашого проєкту
+                        FileDownloadName = $"library{DateTime.UtcNow.ToShortDateString()}.xlsx"
+                    };
+
+                }
+            }
         }
 
         // GET: Stadia/Edit/5

@@ -100,8 +100,6 @@ namespace Laba2.Controllers
                 managers = managersResult
             };
 
-
-
             using ( XLWorkbook workbook = new XLWorkbook())
             {
 
